@@ -7,8 +7,8 @@ services:
             - LISTEN_ADDR=0.0.0.0:8080
             - BOLT_PATH=/data/bot.db
             - STORE=bolt
-            - TELEGRAM_ADMIN=198007208
-            - TELEGRAM_TOKEN=753332195:AAF7nOw67tVTWSXZbwkN48t65ETMdXiG_Es
+            - TELEGRAM_ADMIN=XXXXXXXXX
+            - TELEGRAM_TOKEN=XXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             - TEMPLATE_PATHS=/templates/default.tmpl
         volumes:
             - /srv/monitoring/alertmanager-bot:/data

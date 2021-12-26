@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$bootstrap = <<SCRIPT
+yum install -y yum-utils
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install docker-ce docker-ce-cli containerd.io -y
+systemctl enable docker
+systemctl start docker
+SCRIPT
+
+Vagrant.configure(2) do |config|
+    config.vm.box = "centos/7"
+
+    config.vm.provider "virtualbox" do |v|
+      v.memory = 8192
+      v.cpus = 4
+    end
+
+    config.vm.define "elk" do |elk|
+      elk.vm.network "forwarded_port", guest: 5601, host: 5601
+      elk.vm.network "private_network", ip: "192.168.50.10"
+      elk.vm.hostname = "elk"
+      elk.vm.provision "file", source: "./docker_swarm", destination: "docker_swarm"
+      elk.vm.provision "shell", inline: $bootstrap
+      elk.vm.provision "shell", inline: <<-SHELL
+      cd docker_swarm/
+      setenforce 0
+      docker swarm init --advertise-addr 192.168.50.10
+      docker pull docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+      docker pull docker.elastic.co/kibana/kibana:7.16.2
+      docker pull docker.elastic.co/beats/filebeat:7.16.2
+      docker pull docker.elastic.co/beats/metricbeat:7.16.2
+      docker pull docker.elastic.co/beats/heartbeat:7.16.2
+      docker stack deploy --compose-file docker-stack.yaml ELK_Stack
+      SHELL
+    end
+
+end

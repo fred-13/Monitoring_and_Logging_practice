@@ -1,0 +1,126 @@
+version: '3.3'
+services:
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    configs:
+      - source: elastic_config
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+    environment:
+      ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
+      ELASTIC_PASSWORD: changeme
+      discovery.type: single-node
+    networks:
+      - elk
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.2
+    ports:
+      - "5601:5601"
+    configs:
+      - source: kibana_config
+        target: /usr/share/kibana/config/kibana.yml
+    networks:
+      - elk
+    deploy:
+      mode: replicated
+      replicas: 1
+    depends_on:
+      - elasticsearch
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.16.2
+    user: root
+    command:
+      - -e
+      - --strict.perms=false
+      - --system.hostfs=/hostfs
+    volumes:
+      - type: bind
+        source: ./metricbeat/config/metricbeat.yml
+        target: /usr/share/metricbeat/metricbeat.yml
+        read_only: true
+      - type: bind
+        source: /
+        target: /hostfs
+        read_only: true
+      - type: bind
+        source: /sys/fs/cgroup
+        target: /hostfs/sys/fs/cgroup
+        read_only: true
+      - type: bind
+        source: /proc
+        target: /hostfs/proc
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    networks:
+      - elk
+    deploy:
+      mode: replicated
+      replicas: 1
+    depends_on:
+      - elasticsearch
+
+  heartbeat:
+    user: root
+    image: docker.elastic.co/beats/heartbeat:7.16.2
+    volumes:
+      - ./heartbeat/config/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: heartbeat -e -strict.perms=false
+    networks:
+      - elk
+    deploy:
+      mode: replicated
+      replicas: 1
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.16.2
+    user: root
+    command:
+      - -e
+      - --strict.perms=false
+    volumes:
+      - type: bind
+        source: ./filebeat/config/filebeat.yml
+        target: /usr/share/filebeat/filebeat.yml
+        read_only: true
+      - type: bind
+        source: /var/lib/docker/containers
+        target: /var/lib/docker/containers
+        read_only: true
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    networks:
+      - elk
+    deploy:
+      mode: replicated
+      replicas: 1
+    depends_on:
+      - elasticsearch
+
+configs:
+  elastic_config:
+    file: ./elasticsearch/config/elasticsearch.yml
+  kibana_config:
+    file: ./kibana/config/kibana.yml
+
+networks:
+  elk:
+    driver: overlay
+
+volumes:
+  metricbeat:

@@ -1,3 +1,7 @@
 **/.vagrant
 **/*.vdi
 **/Vagrantfiler
+**/provider.tf
+**/.terraform
+**/*.tfstate*
+**/.terraform.lock.hcl

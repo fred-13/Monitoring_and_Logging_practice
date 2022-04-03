@@ -1,0 +1,8 @@
+[all]
+prometheus ansible_host=192.168.100.100 ansible_user=ubuntu ip=192.168.100.100
+
+[prometheus-server]
+prometheus
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python

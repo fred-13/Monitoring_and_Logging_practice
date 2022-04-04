@@ -28,10 +28,10 @@
     remote_src: yes
     mode: 0755
 
-- name: Delete prometheus tmp folder
-  file:
-    path: '/tmp/prometheus-2.18.1.linux-amd64'
-    state: absent
+# - name: Delete prometheus tmp folder
+#   file:
+#     path: '/tmp/prometheus-2.18.1.linux-amd64'
+#     state: absent
 
 - name: Creates directory
   file: 
@@ -49,10 +49,17 @@
     group: "{{groupId}}"
     mode: 0755
 
-- name: config file
+- name: Prometheus config file
   template:
     src: prometheus.yml.j2
     dest: /etc/prometheus/prometheus.yml
+  notify: event_restart_prometheus
+
+- name: Alert config file
+  template:
+    src: all.rules.j2
+    dest: /etc/prometheus/all.rules
+  notify: event_restart_prometheus
 
 - name: Copy systemd init file
   template:

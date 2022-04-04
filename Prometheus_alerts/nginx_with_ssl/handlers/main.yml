@@ -1,0 +1,28 @@
+---
+
+- name: nginx restart
+  become: true
+  systemd:
+    daemon_reload: true
+    name: nginx
+    state: restarted
+
+- name: Check Nginx config
+  shell: "/usr/sbin/nginx -t"
+  register: nginx_config_status
+
+- name: Nginx test status all
+  debug:
+    msg: "{{ nginx_config_status }}"
+
+- name: Nginx test status
+  debug:
+    msg: "{{ nginx_config_status.rc }}"
+
+- name: Service Nginx restart
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  when: nginx_config_status.rc == 0

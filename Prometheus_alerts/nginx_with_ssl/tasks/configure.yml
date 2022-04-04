@@ -1,0 +1,46 @@
+---
+
+- name: Create SSL directy
+  file:
+    path: "{{ cert_dir }}"
+    state: directory
+
+- name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+  openssl_privatekey:
+    path: "{{ cert_dir }}/nginx_key.pem"
+    type: RSA
+
+- name: Generate an OpenSSL Certificate Signing Request
+  openssl_csr:
+    path: "{{ cert_dir }}/nginx_csr.csr"
+    privatekey_path: "{{ cert_dir }}/nginx_key.pem"
+    country_name: RU
+    organization_name: Example
+    email_address: example@example.ru
+    common_name: example.ru
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: "{{ cert_dir }}/nginx_cert.crt"
+    privatekey_path: "{{ cert_dir }}/nginx_key.pem"
+    csr_path: "{{ cert_dir }}/nginx_csr.csr"
+    provider: selfsigned
+
+- name: Copy nginx configuration in place.
+  template:
+    src: "{{ nginx_conf_template }}"
+    dest: "{{ nginx_conf_file_path }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Check Nginx config
+    - Nginx test status all
+    - Nginx test status
+    - Service Nginx restart
+
+- name: Ensure Nginx service is running as configured.
+  service:
+    name: nginx
+    state: started
+    enabled: true

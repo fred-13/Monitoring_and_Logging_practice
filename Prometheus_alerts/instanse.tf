@@ -123,7 +123,7 @@ resource "gcore_volume" "nginx_first_volume" {
 resource "gcore_instance" "prometheus_instance" {
   flavor_id = "g0-standard-2-4"
   name = "prometheus"
-  keypair_name = "Fred"
+  keypair_name = "WSL"
 
   volume {
     source = "existing-volume"
@@ -180,13 +180,20 @@ resource "gcore_instance" "prometheus_instance" {
     ]
   }
 
+  provisioner "local-exec" {
+    command = <<EOT
+      ssh -o "StrictHostKeyChecking no" ubuntu@${gcore_floatingip.fip_prometheus.floating_ip_address}
+      ansible-playbook -i ${gcore_floatingip.fip_prometheus.floating_ip_address}, prometheus.yaml -u ubuntu -b
+  EOT
+  }
+
 }
 
 #-------------Nginx instance-------------#
 resource "gcore_instance" "nginx_instance" {
   flavor_id = "g0-standard-1-2"
   name = "nginx"
-  keypair_name = "Fred"
+  keypair_name = "WSL"
 
   volume {
     source = "existing-volume"
@@ -228,8 +235,15 @@ resource "gcore_instance" "nginx_instance" {
 
   provisioner "remote-exec" {
     inline = [
-      "ls -alh",
+      "hostname",
     ]
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      ssh -o "StrictHostKeyChecking no" ubuntu@${gcore_floatingip.fip_nginx.floating_ip_address}
+      ansible-playbook -i ${gcore_floatingip.fip_nginx.floating_ip_address}, nginx.yaml -u ubuntu -b
+  EOT
   }
 
 }

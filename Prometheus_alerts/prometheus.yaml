@@ -1,4 +1,6 @@
 ---
-- hosts: all
-  roles:
-  - prometheus-server
+
+  - hosts: all
+    roles:
+    - prometheus-server
+    - alertmanager

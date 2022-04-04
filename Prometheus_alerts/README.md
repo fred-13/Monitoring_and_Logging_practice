@@ -1,5 +1,5 @@
-How to run playbook for install prometheus-server:
+How to run prometheus stack on G-CoreLabs cloud:
 
 ```
-	ansible-playbook -i 185.14.46.81, prometheus.yaml -u ubuntu -b
+	terraform apply
 ```

@@ -27,7 +27,7 @@
 
 - name: create alertmanager data directory
   file:
-    path: "/var/lib/alertmanager"
+    path: "/data/alertmanager"
     state: directory
     owner: alertmanager
     group: alertmanager

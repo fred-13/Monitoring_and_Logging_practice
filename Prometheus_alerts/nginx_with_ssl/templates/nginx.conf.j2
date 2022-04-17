@@ -28,10 +28,6 @@ http {
     include             /etc/nginx/mime.types;
     default_type        application/octet-stream;
 
-  upstream node-exporter {
-    server {{ node_exporter_host }};
-    }
-
   server {
        listen       {{ nginx_listen_port }} ssl;
        server_name _;
@@ -39,8 +35,11 @@ http {
        ssl_certificate {{ cert_dir }}/nginx_cert.crt;
        ssl_certificate_key {{ cert_dir }}/nginx_key.pem;
 
-       location /exporter {
-         proxy_pass http://node-exporter/metrics;
+       location /nginx_status {
+         stub_status on;
+         access_log off;
+         allow 127.0.0.1;
+         allow 172.16.0.0/12;
          allow 192.168.10.0/24;
          deny  all;
         }

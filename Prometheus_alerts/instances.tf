@@ -123,7 +123,7 @@ resource "gcore_volume" "nginx_first_volume" {
 resource "gcore_instance" "prometheus_instance" {
   flavor_id = "g0-standard-2-4"
   name = "prometheus"
-  keypair_name = "WSL"
+  keypair_name = "Fred"
 
   volume {
     source = "existing-volume"
@@ -191,9 +191,9 @@ resource "gcore_instance" "prometheus_instance" {
 
 #-------------Nginx instance-------------#
 resource "gcore_instance" "nginx_instance" {
-  flavor_id = "g0-standard-1-2"
+  flavor_id = "g0-standard-2-4"
   name = "nginx"
-  keypair_name = "WSL"
+  keypair_name = "Fred"
 
   volume {
     source = "existing-volume"
@@ -236,6 +236,13 @@ resource "gcore_instance" "nginx_instance" {
   provisioner "remote-exec" {
     inline = [
       "hostname",
+      "sudo apt-get update",
+      "sudo apt-get install ca-certificates curl gnupg lsb-release -y",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg",
+      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install docker-ce docker-ce-cli containerd.io -y",
+      "docker run -d -p 9113:9113 nginx/nginx-prometheus-exporter:0.10.0 -nginx.scrape-uri=https://192.168.10.7/nginx_status -nginx.ssl-verify=false -nginx.retries=10 -web.telemetry-path=/metrics",
     ]
   }
 

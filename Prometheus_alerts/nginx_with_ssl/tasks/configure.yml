@@ -26,6 +26,15 @@
     csr_path: "{{ cert_dir }}/nginx_csr.csr"
     provider: selfsigned
 
+- name: Add a user to a password file and ensure permissions are set
+  htpasswd:
+    path: /etc/nginx/auth.basic
+    name: "{{ auth_basic_user }}"
+    password: "{{ auth_basic_pass }}"
+    owner: nobody
+    group: nogroup
+    mode: 0640
+
 - name: Copy nginx configuration in place.
   template:
     src: "{{ nginx_conf_template }}"

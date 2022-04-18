@@ -12,7 +12,10 @@
     state: latest
     update_cache: yes
 
-- name: install latest pyOpenSSL module if needed
+- name: install latest modules if needed
   pip:
-    name: pyOpenSSL
+    name: "{{ item }}"
     state: latest
+  loop:
+    - passlib
+    - pyOpenSSL

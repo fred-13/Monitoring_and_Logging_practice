@@ -53,19 +53,19 @@
   template:
     src: prometheus.yml.j2
     dest: /etc/prometheus/prometheus.yml
-  notify: event_restart_prometheus
+  notify: Restart the Prometheus service
 
 - name: Alert config file
   template:
     src: all.rules.j2
     dest: /etc/prometheus/all.rules
-  notify: event_restart_prometheus
+  notify: Restart the Prometheus service
 
 - name: Copy systemd init file
   template:
     src: prometheus.service.j2
     dest: /etc/systemd/system/prometheus.service
-  notify: systemd_reload
+  notify: Restart the Prometheus service
 
 - name: Start prometheus service
   service:

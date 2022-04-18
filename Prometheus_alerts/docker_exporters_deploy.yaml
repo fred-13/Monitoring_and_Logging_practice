@@ -1,0 +1,46 @@
+---
+
+  - hosts: all
+
+    tasks:
+
+      - name: Install latest docker module on host
+        pip:
+          name: docker
+          state: latest
+
+      - name: Deploy Nginx Exporter
+        docker_container:
+          name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:0.10.0
+          command:
+            - -nginx.scrape-uri=https://192.168.10.7/nginx_status
+            - -nginx.ssl-verify=false
+            - -nginx.retries=10 
+            - -web.telemetry-path=/metrics
+          privileged: yes
+          detach: yes
+          published_ports:
+            - "9113:9113"
+
+      - name: Copy files for custom exporter
+        copy:
+          src: ./custom_exporter
+          dest: ~/
+
+      - name: Build image for custom exporter
+        docker_image:
+          name: prometheus-custom-collector:latest
+          source: build
+          build:
+            path: ~/custom_exporter
+            http_timeout: 600
+
+      - name: Deploy Custom Collector
+        docker_container:
+          name: custom-collector
+          image: prometheus-custom-collector:latest
+          privileged: yes
+          detach: yes
+          published_ports:
+            - "8000:8000"

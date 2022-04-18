@@ -28,6 +28,14 @@ http {
     include             /etc/nginx/mime.types;
     default_type        application/octet-stream;
 
+  upstream prometheus {
+      server 192.168.10.6:9090;
+  }
+
+  upstream alertmanager {
+      server 192.168.10.6:9093;
+  }
+
   server {
        listen       {{ nginx_listen_port }} ssl;
        server_name _;
@@ -42,6 +50,18 @@ http {
          allow 172.16.0.0/12;
          allow 192.168.10.0/24;
          deny  all;
+        }
+
+        location /prom/ {
+          proxy_pass http://prometheus/prom/;
+          auth_basic "Restricted area";
+          auth_basic_user_file /etc/nginx/auth.basic;
+        }
+
+        location /alert/ {
+          proxy_pass http://alertmanager/;
+          auth_basic "Restricted area";
+          auth_basic_user_file /etc/nginx/auth.basic;
         }
 
        error_page 404 /404.html;

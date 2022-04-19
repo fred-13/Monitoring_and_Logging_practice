@@ -249,6 +249,7 @@ resource "gcore_instance" "nginx_instance" {
     command = <<EOT
       ssh -o "StrictHostKeyChecking no" ubuntu@${gcore_floatingip.fip_nginx.floating_ip_address}
       ansible-playbook -i ${gcore_floatingip.fip_nginx.floating_ip_address}, nginx.yaml -u ubuntu -b
+      ansible-playbook -i ${gcore_floatingip.fip_nginx.floating_ip_address}, docker_exporters_deploy.yaml -u ubuntu -b
   EOT
   }
 

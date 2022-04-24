@@ -1,5 +1,5 @@
 provider gcore {
   permanent_api_token="TOKEN"
   gcore_platform_api = "https://api.gcdn.co"
-  gcore_api = "https://api.cloud.gcorelabs.com"
+  gcore_cloud_api = "https://api.cloud.gcorelabs.com"
 }

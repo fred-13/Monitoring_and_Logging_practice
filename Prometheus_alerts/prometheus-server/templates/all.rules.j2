@@ -2,14 +2,35 @@ groups:
 - name: example
   rules:
 
-  # Alert for any instance that is unreachable for >5 minutes.
   - alert: InstanceDown
     expr: up == 0
-    for: 5m
+    for: 3m
     labels:
-      severity: page
+      severity: critical
     annotations:
         {% raw %}
         summary: "Instance {{ $labels.instance }} down"
-        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 3 minutes."
+        {% endraw %}
+
+  - alert: nginx_is_running
+    expr: nginx_up == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+        {% raw %}
+      summary: "Critical: Nginx is down on the host {{ $labels.instance }}."
+      description: "Nginx has been down for more than 30 seconds"
+        {% endraw %}
+
+  - alert: nginx_not_all_connections_are_handled
+    expr: rate(nginx_connections_handled{job="nginx_exporter"}[5m]) / rate(nginx_connections_accepted{job="nginx_exporter"}[5m]) < 1
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+        {% raw %}
+      description: "Critical: Nginx does not handle all accept connections on the host {{ $labels.instance }} for more than 3 minutes"
+      summary: "Nginx issue with handling connections"
         {% endraw %}

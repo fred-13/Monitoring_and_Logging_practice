@@ -123,7 +123,7 @@ resource "gcore_volume" "nginx_first_volume" {
 resource "gcore_instance" "prometheus_instance" {
   flavor_id = "g0-standard-2-4"
   name = "prometheus"
-  keypair_name = "WSL"
+  keypair_name = "Fred"
 
   volume {
     source = "existing-volume"
@@ -193,7 +193,7 @@ resource "gcore_instance" "prometheus_instance" {
 resource "gcore_instance" "nginx_instance" {
   flavor_id = "g0-standard-2-4"
   name = "nginx"
-  keypair_name = "WSL"
+  keypair_name = "Fred"
 
   volume {
     source = "existing-volume"
@@ -249,7 +249,7 @@ resource "gcore_instance" "nginx_instance" {
     command = <<EOT
       ssh -o "StrictHostKeyChecking no" ubuntu@${gcore_floatingip.fip_nginx.floating_ip_address}
       ansible-playbook -i ${gcore_floatingip.fip_nginx.floating_ip_address}, nginx.yaml -u ubuntu -b
-      ansible-playbook -i ${gcore_floatingip.fip_nginx.floating_ip_address}, docker_exporters_deploy.yaml -u ubuntu -b
+      ansible-playbook -i ${gcore_floatingip.fip_nginx.floating_ip_address}, docker_services_deploy.yaml -u ubuntu -b
   EOT
   }
 

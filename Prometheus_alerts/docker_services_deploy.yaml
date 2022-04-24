@@ -44,3 +44,23 @@
           detach: yes
           published_ports:
             - "8000:8000"
+
+      - name: Deploy Alertmanager-bot
+        docker_container:
+          name: alertmanager-bot
+          privileged: yes
+          detach: yes
+          restart_policy: always
+          image: metalmatze/alertmanager-bot:0.4.3
+          env:
+            TELEGRAM_ADMIN: "123456789"
+            TELEGRAM_TOKEN: "XXXXXXX"
+          command:
+            - --alertmanager.url=http://192.168.10.6:9093
+            - --log.level=info
+            - --store=bolt
+            - --bolt.path=/data/bot.db
+          volumes:
+            - ./data:/data
+          published_ports:
+            - "8080:8080"

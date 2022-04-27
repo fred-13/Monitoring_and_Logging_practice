@@ -20,6 +20,7 @@
             - -web.telemetry-path=/metrics
           privileged: yes
           detach: yes
+          restart_policy: always
           published_ports:
             - "9113:9113"
 
@@ -42,6 +43,7 @@
           image: prometheus-custom-collector:latest
           privileged: yes
           detach: yes
+          restart_policy: always
           published_ports:
             - "8000:8000"
 
